@@ -1,0 +1,9 @@
+{
+  "name": "newtonx-hub-copilot",
+  "version": "1.0.0",
+  "description": "NewtonX Hub Research Copilot prototype",
+  "private": true,
+  "engines": {
+    "node": "18.x"
+  }
+}
