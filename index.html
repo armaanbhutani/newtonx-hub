@@ -80,6 +80,7 @@ nav{background:var(--white);border-bottom:0.5px solid var(--border2);padding:0 3
 .opt-btn{background:var(--white);border:0.5px solid var(--border2);color:var(--ink2);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 17px;border-radius:var(--r);cursor:pointer;transition:all 0.15s;text-align:left;line-height:1.4}
 .opt-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg)}
 .opt-btn.sel{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);font-weight:500}
+.opt-btn.opt-multi.sel::before{content:'✓  ';font-size:11px}
 .loading-row{display:flex;gap:8px;align-items:center;color:var(--ink4);font-size:13px;padding:12px 0}
 .spinner{width:16px;height:16px;border:2px solid var(--ink5);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -496,11 +497,12 @@ async function fetchClarifyQ(si){
   const res=await callJSON(sys,`Business question: "${userQ}"${prior?`\n\nPrior answers:\n${prior}`:''}`);
   if(!res||res._err){body.innerHTML=`<div style="color:var(--red);font-size:13px;padding:12px 0">${res?res._err:'Error loading question.'} <button onclick="fetchClarifyQ(${si})" style="color:var(--blue);background:none;border:none;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline">Retry</button></div>`;return;}
   currentQData=res;
+  if(si>=1&&si<=3)res.multiSelect=true;
   const isLast=si===TOTAL_STEPS-1;
   body.innerHTML=`
     <div class="ai-lbl">Copilot · question ${si+1} of ${TOTAL_STEPS}</div>
     <div class="cl-q">${res.question}</div>
-    <div class="opts-wrap" id="opts-wrap">${res.options.map(o=>`<button class="opt-btn" onclick="pickOpt(this,'${o.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">${o}</button>`).join('')}<button class="opt-btn opt-other" onclick="pickOther(this)" id="opt-other-btn">Other — type your answer</button></div>
+    <div class="opts-wrap" id="opts-wrap">${res.options.map(o=>`<button class="opt-btn${res.multiSelect?' opt-multi':''}" onclick="${res.multiSelect?'pickMulti':'pickOpt'}(this,'${o.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">${o}</button>`).join('')}<button class="opt-btn opt-other" onclick="pickOther(this)" id="opt-other-btn">Other — type your answer</button></div>
     <div id="other-input-wrap" style="display:none;margin-bottom:20px">
       <input id="other-input" type="text" placeholder="Describe your situation…" style="width:100%;border:0.5px solid var(--blue-border);border-radius:var(--r);padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--white);outline:none;box-shadow:0 0 0 3px var(--blue-mid)" oninput="handleOtherInput(this)" />
     </div>
